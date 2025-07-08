@@ -2,17 +2,19 @@
 import { LoginRequestDTO } from "@/Data/DTOs/auth.dto";
 import { loginUseCase } from "@/Services/auth/auth.services";
 import { translateErrorMessage } from "@/utils/error_translate";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 
 export default function LoginPage() {
   const [form, setForm] = useState<LoginRequestDTO>({ username: "", password: "", client: "web"});
   const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleLogin = async () => {
     try {
       const user = await loginUseCase.execute(form);
-      console.log("Logged in as", user);
+      if(user) router.replace("/dashboard")
       // simpan ke context atau localstorage dsb.
     } catch (err) {
       setError((err as Error).message);
