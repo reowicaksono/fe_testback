@@ -3,4 +3,6 @@ export interface User{
     name: string,
     username: string,
     email: string,
+    token: string,
+    created_at: Date
 };
