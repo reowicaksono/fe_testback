@@ -1,7 +1,8 @@
 "use client";
 import { RegisterRequestDTO } from "@/Data/DTOs/auth.dto";
 import { registerUseCase } from "@/Services/auth/auth.services";
-import { translateErrorMessage } from "@/utils/error_translate";
+import { translateErrorMessage } from "@/Shared/lib/utils";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

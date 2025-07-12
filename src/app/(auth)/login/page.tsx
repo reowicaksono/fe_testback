@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { LoginRequestDTO } from "@/Data/DTOs/auth.dto";
 import { loginUseCase } from "@/Services/auth/auth.services";
-import { translateErrorMessage } from "@/utils/error_translate";
+import { translateErrorMessage } from "@/Shared/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
