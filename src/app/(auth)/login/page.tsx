@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { LoginRequestDTO } from "@/Data/DTOs/auth.dto";
 import { loginUseCase } from "@/Services/auth/auth.services";
 import { translateErrorMessage } from "@/utils/error_translate";
@@ -37,7 +38,7 @@ export default function LoginPage() {
         value={form.password}
         onChange={(e) => setForm({ ...form, password: e.target.value })}
       />
-      <button onClick={handleLogin}>Login</button>
+      <Button onClick={handleLogin}>Login</Button>
       {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
