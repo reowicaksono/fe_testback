@@ -4,19 +4,33 @@ import { LoginRequestDTO } from "@/Data/DTOs/auth.dto";
 import { loginUseCase } from "@/Services/auth/auth.services";
 import { translateErrorMessage } from "@/Shared/lib/utils";
 import { useRouter } from "next/navigation";
+import { setCookie } from "nookies";
 import { useState } from "react";
 
 
 export default function LoginPage() {
   const [form, setForm] = useState<LoginRequestDTO>({ username: "", password: "", client: "web"});
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string>("");
   const router = useRouter();
 
   const handleLogin = async () => {
     try {
-      const user = await loginUseCase.execute(form);
-      if(user) router.replace("/dashboard")
-      // simpan ke context atau localstorage dsb.
+      const {data, error} = await loginUseCase.execute(form);
+
+    if (error) {
+      setError(error);
+      return;
+    }
+      
+    setCookie(null,"refresh_token", data!.access_token,{
+      maxAge: 1 * 24 * 60 * 60, 
+      path: "/",
+    })
+    setCookie(null,"access_token", data!.refresh_token,{
+      maxAge: 1 * 24 * 60 * 60, 
+    });
+    router.replace("/dashboard")
+
     } catch (err) {
       setError((err as Error).message);
       translateErrorMessage(err);
