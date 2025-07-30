@@ -28,11 +28,26 @@ export function middleware(request: NextRequest) {
   const headers = new Headers(request.headers);
   headers.set("x-current-path", pathname);
 
-  if(isPublicPath(pathname)) return NextResponse.next({ headers });
-  if(!isProtectedPath(pathname)) return NextResponse.next({ headers });
-
   const accessToken = request.cookies.get("access_token")?.value;
   const refreshToken = request.cookies.get("refresh_token")?.value;
+
+  if(isPublicPath(pathname) && pathname !== "/" && (accessToken || refreshToken)) {
+    if(accessToken && isValidToken(accessToken)) {
+      const redirectUrl = request.nextUrl.searchParams.get("redirect");
+      const targetUrl = redirectUrl || "/dashboard";
+      return NextResponse.redirect(new URL(targetUrl, request.url));
+    }
+
+    if(refreshToken && (!accessToken || !isValidToken(accessToken))) {
+      const response = NextResponse.next({ headers });
+      response.cookies.delete("access_token");
+      response.cookies.delete("refresh_token");
+      return response;
+    }
+  }
+
+  if(isPublicPath(pathname)) return NextResponse.next({ headers });
+  if(!isProtectedPath(pathname)) return NextResponse.next({ headers });
 
   if(!accessToken && !refreshToken){
     const loginUrl = new URL("/login", request.url);
@@ -42,15 +57,18 @@ export function middleware(request: NextRequest) {
 
   if(accessToken && isValidToken(accessToken)) return NextResponse.next({ headers });
 
-  if(refreshToken &&  (!accessToken || !isValidToken(accessToken))) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect",pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-    //   all redirect login
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect",pathname);
 
-    return NextResponse.redirect(loginUrl);
+  if(refreshToken && (!accessToken || !isValidToken(accessToken))) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    const response = NextResponse.redirect(loginUrl);
+    response.cookies.delete("access_token");
+    response.cookies.delete("refresh_token");
+    return response;
+  }
+  
+  const loginUrl = new URL("/login", request.url);
+  loginUrl.searchParams.set("redirect", pathname);
+  return NextResponse.redirect(loginUrl);
 }
 
